@@ -9,7 +9,8 @@ google.maps.event.addDomListener(window, "load", function() {
     	suppressInfoWindows: false,
 	});
 
-	var kmlPath = "http://glider197.eri.ucsb.edu/test.kml";
+	var kmlPath = "http://glider197.eri.ucsb.edu/var/test.kml";
+	//var kmlPath = "http://fablio-mini.eri.ucsb.edu/test/sites/glider197/var/test.kml";
 	var urlSuffix = (new Date).getTime().toString();
 	var layer = new google.maps.KmlLayer(kmlPath + '?' + urlSuffix, {
 		map: map,
@@ -20,12 +21,12 @@ google.maps.event.addDomListener(window, "load", function() {
 		var cdata = event.featureData.description;
 		var description = cdata.replace("<![CDATA[", "").replace("]]>", "");
 		console.log(cdata);
-		document.getElementById("content-window").innerHTML = description; 
+		document.getElementById("content-window").innerHTML = description;
 	});
 
-	var listener = google.maps.event.addListener(map, "idle", function() { 
-		if (map.getZoom() > 14) map.setZoom(14); 
-		google.maps.event.removeListener(listener); 
+	var listener = google.maps.event.addListener(map, "idle", function() {
+		if (map.getZoom() > 14) map.setZoom(14);
+		google.maps.event.removeListener(listener);
 	});
 
 });

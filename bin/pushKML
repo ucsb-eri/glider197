@@ -1,0 +1,3 @@
+#!/bin/sh
+# goal here is to push the KML file just created to the absolute pathname where it needs to reside
+rsync -av ./var/test.kml blaze:/home/oceancolor/glider197/www/var/

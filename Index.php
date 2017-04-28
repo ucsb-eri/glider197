@@ -3,8 +3,8 @@
 Basically, DATAPOINTS (defined below) (currently: /home/oceancolor/glider197/data/datapoints)
 is the file parsed for locations to build the kml file.  So empty that file and the data points dissapear :-)
 
-That file is built automatically from the "unit" files in that same directory.  So next 
-step is to drop those unit* files into another folder so that their data is not re-introduced 
+That file is built automatically from the "unit" files in that same directory.  So next
+step is to drop those unit* files into another folder so that their data is not re-introduced
 into datapoints the next time a new unit file is dropped in the folder.
 
 Biggest issues in the past to the data flow have been permissions/selinux issues.
@@ -41,7 +41,7 @@ class dataProc {
         //$iconstyle->addChild("scale","0.7");
         $icon = $iconstyle->addChild("Icon");
         $icon->addChild("href","http://glider197.eri.ucsb.edu/images/glider-y.png");
-        
+
         foreach($lines as $line){
             // datestamp, unit, lat, lon, filename, time offset
             $f = explode(",",$line);
@@ -61,11 +61,11 @@ class dataProc {
             $pt = $pm->addChild("Point");
             $pt->addChild("coordinates",$lon . "," . $lat);
         }
-        
-        $xml->outputFile("test.kml");
-        
+
+        $xml->outputFile("./var/test.kml");
+
     }
-    // takes the funky format from the email which is DDMM.MMMM 
+    // takes the funky format from the email which is DDMM.MMMM
     // to DD.DDDDDDDD
     function fixCoord($val){
         if( preg_match("/^([+-]*)(\d{2,3})(\d{2}\.\d{3})$/",$val,$m)){
