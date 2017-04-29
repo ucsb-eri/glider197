@@ -21,10 +21,11 @@ define('DATAPOINTS',"../data/datapoints");
 
 require_once("htmlDoc.php");
 require_once("xmlUtils.php");
+////////////////////////////////////////////////////////////////////////////////
 // $h = new htmlDoc("Glider 197","");
 // $h->css("css/glider.css");
 // $h->beg();
-
+////////////////////////////////////////////////////////////////////////////////
 class dataProc {
     function __construct($file){
         date_default_timezone_set('America/Los_Angeles');
@@ -38,9 +39,10 @@ class dataProc {
         $this->addStyles();   // add all of our icons in
 
         $this->readData($file);
-        $lastepoch = $points[(count($this->points)-1)]['epoch'];
-        echo "Hey There - last epoch: $lastepoch";
+        $this->lastepoch = $this->points[(count($this->points)-1)]['epoch'];
+        //echo "Hey There - last epoch: $lastepoch";
         $this->addDataPointsToKML();
+        $this->getLast10();
 
         // we now want to do a bit more with the data display
         // want to have timestamps associated with it...
@@ -50,6 +52,20 @@ class dataProc {
         // so we have our points now...  In order they were in in file
         // now we can manipulate data if we need to
     }
+    ////////////////////////////////////////////////////////////////////////////
+    function getLast10(){
+        $sep = '&nbsp;&nbsp;|&nbsp;&nbsp;';
+        $b = "";
+        $rev = array_reverse($this->points);
+        $slice = array_slice($rev,0,10);
+        foreach($slice as $s){
+            $l = array();
+            foreach(array('unit','date','lat','lon') as $field) $l[] = $s[$field];
+            $b .= implode($sep,$l) . "<br>\n";
+        }
+        return $b;
+    }
+    ////////////////////////////////////////////////////////////////////////////
     function readData($file){
         $formatstr = '%Y%m%d-%H%M%S';
         $lines = file($file);
@@ -58,33 +74,45 @@ class dataProc {
             // datestamp, unit, lat, lon, filename, time offset
             $f = explode(",",$line);
             $point['name'] = $f[1] . "-" . $f[0];
+            $point['unit'] = $f[1];
+            $point['date'] = $f[0];
             $point['lat'] = $this->fixCoord($f[2]);
             $point['lon'] = $this->fixCoord($f[3]);
             $df = "../data/" . $f[4];
             if( file_exists($df)){
                 $point['cdata'] = file_get_contents($df);
             }
+
+            $date = DateTime::createFromFormat('Ymd-His',$f[0]);
+            $point['epoch'] = $date->format('U');
+            //echo "DateTime: epoch: {$point['epoch']}<br>\n";
+
             // f[0] is timestamp YYYYMMDD-HHMMSS
-            if(($point['epoch'] = strtotime($f[0])) === false){
-                //echo "error with timestring new: {$f[0]}<br>\n";
-                if( ($tm = strptime($f[0],$formatstr)) === false) {
-                    echo "error with strptime : {$f[0]}<br>\n";
-                }
-                $point['epoch'] = mktime($tm);
-                //print_r($time_t);
-                //$dateobj = DateTime::createFromFormat($formatstr, $f[0]);
-                //$point['epoch'] = $dateobj->format(Datetime::ATOM);
-            }
+            //if(($point['epoch'] = strtotime($f[0])) === false){
+            //    //echo "error with timestring new: {$f[0]}<br>\n";
+            //    if( ($tm = strptime($f[0],$formatstr)) === false) {
+            //        echo "error with strptime : {$f[0]}<br>\n";
+            //    }
+            //    $point['epoch'] = mktime($tm);
+            //    //print_r($time_t);
+            //    //$dateobj = DateTime::createFromFormat($formatstr, $f[0]);
+            //    //$point['epoch'] = $dateobj->format(Datetime::ATOM);
+            //}
             $this->points[] = $point;
         }
     }
+    ////////////////////////////////////////////////////////////////////////////
     function addDataPointsToKML(){
         foreach($this->points as $point){
+            $age = $this->lastepoch - $point['epoch'];
+            $icon = $this->age2icon($age);
+            //echo "Age: $age, Icon: $icon<br>\n";
             $pm = $this->doc->addChild("Placemark");
+
             //$pm = $this->xml->addChild("Placemark");
             //$pm = new xmlNode("Placemark");
             $pm->addChild("name",$point['name']);
-            $pm->addChild("styleUrl","#dot-lgray");
+            $pm->addChild("styleUrl","#$icon");
             if(isset($point['cdata']))
             $pm->addChild("description","<![CDATA[\n" . $point['cdata'] . "]]>");
             $pt = $pm->addChild("Point");
@@ -92,8 +120,8 @@ class dataProc {
         }
 
         $this->xml->outputFile("./var/test.kml");
-
     }
+    ////////////////////////////////////////////////////////////////////////////
     function age2icon($agesecs){
         foreach($this->age2iconMap as $e){
             if ($agesecs <= $e['maxsecs']) return $e['style'];
@@ -102,6 +130,7 @@ class dataProc {
         // default to last entry if no matches
         return $default;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function addIcon($agesecs,$id,$url,$scale = 0.5){
         // setup internal date mapping
         $mapEntry = array();
@@ -117,6 +146,7 @@ class dataProc {
         $icon = $iconstyle->addChild("Icon");
         $icon->addChild("href",$url);
     }
+    ////////////////////////////////////////////////////////////////////////////
     function addStyles(){
         // These need to be done in increasing order for that first argument
         $this->addIcon(0       ,'glider','http://glider197.eri.ucsb.edu/images/glider-y.png');
@@ -134,8 +164,10 @@ class dataProc {
         //$icon = $iconstyle->addChild("Icon");
         //$icon->addChild("href","http://glider197.eri.ucsb.edu/images/glider-y.png");
     }
+    ////////////////////////////////////////////////////////////////////////////
     // takes the funky format from the email which is DDMM.MMMM
     // to DD.DDDDDDDD
+    ////////////////////////////////////////////////////////////////////////////
     function fixCoord($val){
         if( preg_match("/^([+-]*)(\d{2,3})(\d{2}\.\d{3})$/",$val,$m)){
             $deg=$m[2];
@@ -216,9 +248,14 @@ $f = new dataProc(DATAPOINTS);
 
 				<!-- map -->
 					<div id="map"></div>
-					<br /><br />
+                    <br />
+                    <div class="last10">
+                        <h4>Last 10 Glider Surfacings (most recent first)</h4>
+                        <?php echo $f->getLast10(); ?>
+                    </div>
+                    <br />
 					<div id="cdata">
-						<h5>Glider logs:</h5>
+						<h4>Glider logs:</h4>
 						<pre id="content-window"></pre>
 					</div>
 
