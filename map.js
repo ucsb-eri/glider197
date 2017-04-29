@@ -10,7 +10,6 @@ google.maps.event.addDomListener(window, "load", function() {
 	});
 
 	var kmlPath = "http://glider197.eri.ucsb.edu/var/test.kml";
-	//var kmlPath = "http://fablio-mini.eri.ucsb.edu/test/sites/glider197/var/test.kml";
 	var urlSuffix = (new Date).getTime().toString();
 	var layer = new google.maps.KmlLayer(kmlPath + '?' + urlSuffix, {
 		map: map,
