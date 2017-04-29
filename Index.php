@@ -149,13 +149,13 @@ class dataProc {
     ////////////////////////////////////////////////////////////////////////////
     function addStyles(){
         // These need to be done in increasing order for that first argument
-        $this->addIcon(0       ,'glider','http://glider197.eri.ucsb.edu/images/glider-y.png');
-        $this->addIcon(24*3600 ,'dot-r','http://glider197.eri.ucsb.edu/images/dot3-r.png');
-        $this->addIcon(48*3600 ,'dot-o','http://glider197.eri.ucsb.edu/images/dot3-o.png');
-        $this->addIcon(72*3600 ,'dot-y','http://glider197.eri.ucsb.edu/images/dot3-y.png');
-        $this->addIcon(96*3600 ,'dot-g','http://glider197.eri.ucsb.edu/images/dot3-g.png');
-        $this->addIcon(120*3600,'dot-b','http://glider197.eri.ucsb.edu/images/dot3-b.png');
-        $this->addIcon(10e12   ,'dot-lgray','http://glider197.eri.ucsb.edu/images/dot3-lgray.png');
+        $this->addIcon(0       ,'glider','http://glider197.eri.ucsb.edu/images/glider-y.png'     ,1.0);
+        $this->addIcon(24*3600 ,'dot-r','http://glider197.eri.ucsb.edu/images/dot3-r.png'        ,0.5);
+        $this->addIcon(48*3600 ,'dot-o','http://glider197.eri.ucsb.edu/images/dot3-o.png'        ,0.5);
+        $this->addIcon(72*3600 ,'dot-y','http://glider197.eri.ucsb.edu/images/dot3-y.png'        ,0.5);
+        $this->addIcon(96*3600 ,'dot-g','http://glider197.eri.ucsb.edu/images/dot3-g.png'        ,0.5);
+        $this->addIcon(120*3600,'dot-b','http://glider197.eri.ucsb.edu/images/dot3-b.png'        ,0.5);
+        $this->addIcon(10e12   ,'dot-lgray','http://glider197.eri.ucsb.edu/images/dot3-lgray.png',0.5);
 
         //
         //$style = $doc->addChild("Style");
