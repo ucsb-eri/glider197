@@ -264,7 +264,7 @@ $f = new dataProc(DATAPOINTS);
                 line-height: 100%;
             }
             div.legend ul li img {
-                height: 10px;
+                height: 12px;
             }
 		</style>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvQMP93WyN1tIhBdQ2-y-BlaUIFOPqYpY"></script>
