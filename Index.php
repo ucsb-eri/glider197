@@ -131,11 +131,15 @@ class dataProc {
         return $default;
     }
     ////////////////////////////////////////////////////////////////////////////
-    function addIcon($agesecs,$id,$url,$scale = 0.5){
+    function addIcon($agehours,$id,$url,$scale = 0.5,$legend = ""){
         // setup internal date mapping
+        $agesecs = $agehours * 3600;
         $mapEntry = array();
         $mapEntry['maxsecs'] = $agesecs;
         $mapEntry['style'] = $id;
+        $mapEntry['desc'] = $legend;
+        $mapEntry['url'] = $url;
+        $mapEntry['scale'] = $scale;
         $this->age2iconMap[] = $mapEntry;
 
         // add to the kml document
@@ -149,13 +153,13 @@ class dataProc {
     ////////////////////////////////////////////////////////////////////////////
     function addStyles(){
         // These need to be done in increasing order for that first argument
-        $this->addIcon(0       ,'glider','http://glider197.eri.ucsb.edu/images/glider-y.png'     ,1.0);
-        $this->addIcon(24*3600 ,'dot-r','http://glider197.eri.ucsb.edu/images/dot3-r.png'        ,0.5);
-        $this->addIcon(48*3600 ,'dot-o','http://glider197.eri.ucsb.edu/images/dot3-o.png'        ,0.5);
-        $this->addIcon(72*3600 ,'dot-y','http://glider197.eri.ucsb.edu/images/dot3-y.png'        ,0.5);
-        $this->addIcon(96*3600 ,'dot-g','http://glider197.eri.ucsb.edu/images/dot3-g.png'        ,0.5);
-        $this->addIcon(120*3600,'dot-b','http://glider197.eri.ucsb.edu/images/dot3-b.png'        ,0.5);
-        $this->addIcon(10e12   ,'dot-lgray','http://glider197.eri.ucsb.edu/images/dot3-lgray.png',0.5);
+        $this->addIcon(0     ,'glider'   ,'http://glider197.eri.ucsb.edu/images/glider-y.png'      ,1.0,"Most recent surfacing");
+        $this->addIcon(24    ,'dot-r'    ,'http://glider197.eri.ucsb.edu/images/dot3-r.png'        ,0.5,"Surfacings within 24 hours");
+        $this->addIcon(48    ,'dot-o'    ,'http://glider197.eri.ucsb.edu/images/dot3-o.png'        ,0.5,"Surfacings within 25-48 hours");
+        $this->addIcon(72    ,'dot-y'    ,'http://glider197.eri.ucsb.edu/images/dot3-y.png'        ,0.5,"Surfacings within 49-72 hours");
+        $this->addIcon(96    ,'dot-g'    ,'http://glider197.eri.ucsb.edu/images/dot3-g.png'        ,0.5,"Surfacings within 73-96 hours");
+        $this->addIcon(120   ,'dot-b'    ,'http://glider197.eri.ucsb.edu/images/dot3-b.png'        ,0.5,"Surfacings within 97-120 hours");
+        $this->addIcon(10e12 ,'dot-lgray','http://glider197.eri.ucsb.edu/images/dot3-lgray.png'    ,0.5,"Surfacings older than 120 hours");
 
         //
         //$style = $doc->addChild("Style");
@@ -163,6 +167,22 @@ class dataProc {
         //$iconstyle = $style->addChild("IconStyle");
         //$icon = $iconstyle->addChild("Icon");
         //$icon->addChild("href","http://glider197.eri.ucsb.edu/images/glider-y.png");
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    // Produce legend
+    ////////////////////////////////////////////////////////////////////////////
+    function legendStr(){
+        $b = '';
+        //$b .= "<div class=\"legend\"><!-- begin legend div -->\n";
+        //$b .= "<h5>All times relative to Most Recent Surfacing displayed</h5>\n";
+        $b .= "<ul class=\"legendList\">\n";
+        foreach($this->age2iconMap as $e){
+            //$h = 30 * $e['scale'];
+            $b .= "<li><img src=\"{$e['url']}\" alt=\"{$e['desc']}\">&nbsp;-&nbsp;{$e['desc']}</li>\n";
+        }
+        $b .= "</ul>\n";
+        //$b .= "</div><!-- close legend div -->\n";
+        return $b;
     }
     ////////////////////////////////////////////////////////////////////////////
     // takes the funky format from the email which is DDMM.MMMM
@@ -222,6 +242,30 @@ $f = new dataProc(DATAPOINTS);
 			#main {
 				width: calc(100%-30%);
 			}
+            div.last10 {
+            	background-color: #eed;
+                line-height: 100%;
+            	padding: 5px;
+            }
+            div.last10 h4 {
+            	padding-bottom: 0px;
+            	margin-bottom: 0px;
+            }
+            div.legend h4 {
+                padding-bottom: 0px;
+            	margin-bottom: 0px;
+            }
+            div.legend ul {
+                margin: 0px;
+                padding: 0px;
+            }
+            div.legend ul li {
+                margin-left: 1.0cm;
+                line-height: 100%;
+            }
+            div.legend ul li img {
+                height: 10px;
+            }
 		</style>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvQMP93WyN1tIhBdQ2-y-BlaUIFOPqYpY"></script>
 		<script src="map.js"></script>
@@ -248,6 +292,10 @@ $f = new dataProc(DATAPOINTS);
 
 				<!-- map -->
 					<div id="map"></div>
+                    <div class="legend">
+                        <h4>Legend (times relative to most recent surfacing)</h4>
+                        <?php echo $f->legendStr(); ?>
+                    </div>
                     <br />
                     <div class="last10">
                         <h4>Last 10 Glider Surfacings (most recent first)</h4>
@@ -255,7 +303,7 @@ $f = new dataProc(DATAPOINTS);
                     </div>
                     <br />
 					<div id="cdata">
-						<h4>Glider logs:</h4>
+						<h4>Glider logs (click on map icon to show raw data):</h4>
 						<pre id="content-window"></pre>
 					</div>
 
